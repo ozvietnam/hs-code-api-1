@@ -2,7 +2,11 @@
   "framework": null,
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/", "destination": "/admin/index.html" }
+    { "source": "/admin/", "destination": "/admin/index.html" },
+    {
+      "source": "/api/version/diff",
+      "destination": "/api/version-diff"
+    }
   ],
   "functions": {
     "api/**/*.js": {

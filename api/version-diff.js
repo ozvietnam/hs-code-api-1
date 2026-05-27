@@ -1,7 +1,10 @@
-const { requireAuth } = require('../../lib/auth');
-const { setCors, handleOptions } = require('../../lib/cors');
-const { diffSnapshotFiles, resolveVersionMeta } = require('../../lib/tariff-versions');
+const { requireAuth } = require('../lib/auth');
+const { setCors, handleOptions } = require('../lib/cors');
+const { diffSnapshotFiles, resolveVersionMeta } = require('../lib/tariff-versions');
 
+/** Flat route avoids Vercel conflict: sibling `api/version.js` + `api/version/` breaks builds.
+ * Canonical URL preserved via rewrite: `/api/version/diff` → this handler.
+ */
 module.exports = function handler(req, res) {
   setCors(res);
   if (handleOptions(req, res)) return;

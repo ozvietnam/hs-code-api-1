@@ -45,7 +45,7 @@ openssl rand -hex 32
 | `/api/kg_stats` | GET | Yes | Dataset overview |
 | `/api/versions` | GET | Yes | Tariff snapshot index |
 | `/api/version?id=` | GET | Yes | One snapshot metadata |
-| `/api/version/diff?from=&to=` | GET | Yes | Diff two snapshots |
+| `/api/version/diff?from=&to=` | GET | Yes | Diff two snapshots (alias: **`/api/version-diff`**) |
 | `/api/admin/overview` | GET | Yes | Aggregated KPIs for `/admin` dashboard |
 
 ## Admin dashboard
