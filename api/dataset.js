@@ -6,6 +6,7 @@ const { enrichedEntryCount } = require('../lib/enriched-data');
 const { buildAdminOverview } = require('../lib/admin-overview');
 const { getDocByCode, listDocs } = require('../lib/legal-docs');
 const { getNotesCoverage } = require('../lib/gir-notes');
+const { searchPrecedents } = require('../lib/precedent-search');
 const fs = require('fs');
 const path = require('path');
 
@@ -91,11 +92,21 @@ module.exports = function handler(req, res) {
     }
 
     if (resource === 'precedents') {
-      const { hs } = req.query;
+      const { hs, q, description } = req.query;
+      const searchText = String(q || description || '').trim();
+      if (searchText.length >= 3) {
+        const matches = searchPrecedents(searchText, { topK: 5 });
+        return res.status(200).json({
+          found: matches.length > 0,
+          query: searchText,
+          total: matches.length,
+          matches,
+        });
+      }
       if (!hs) {
         return res.status(400).json({
-          error: 'hs parameter required',
-          example: '/api/precedents?hs=03046200',
+          error: 'hs or q (description) parameter required',
+          examples: ['/api/precedents?hs=03046200', '/api/precedents?q=máy bơm Pentax'],
         });
       }
       const hsCode = normalizeHs(hs);

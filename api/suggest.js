@@ -4,6 +4,7 @@ const { searchCandidates } = require('../lib/search-utils');
 const { geminiGenerateJson } = require('../lib/gemini');
 const { buildEvidenceTrace } = require('../lib/suggest-evidence');
 const { applyGirRules } = require('../lib/gir-engine');
+const { applyPrecedentBoost, detectSet } = require('../lib/precedent-search');
 const { translateToVi, getBrandHint } = require('../lib/glossary');
 
 const SYSTEM_PROMPT = `Bạn là chuyên gia phân loại hàng hóa hải quan Việt Nam.
@@ -96,12 +97,18 @@ module.exports = async function handler(req, res) {
 
     const rawSuggestions = (json.suggestions || []).slice(0, topReranked);
     const girRanked = applyGirRules(rawSuggestions, description);
-    const suggestions = girRanked.suggestions.slice(0, topReranked);
-    const girRankingRules = girRanked.girRankingRules || [];
+    const precedentRanked = applyPrecedentBoost(girRanked.suggestions, description);
+    const suggestions = precedentRanked.suggestions.slice(0, topReranked);
+    const girRankingRules = [
+      ...(girRanked.girRankingRules || []),
+      ...(precedentRanked.girPrecedentRule ? [precedentRanked.girPrecedentRule] : []),
+      ...(detectSet(description) ? ['GIR-3b'] : []),
+    ];
 
     return res.status(200).json({
       suggestions,
       girRankingRules,
+      precedentMatches: precedentRanked.precedentMatches?.slice(0, 3) || [],
       evidence: evidence.map(({ hsCode, source, score, queryExpansion }) => ({
         hsCode,
         source,

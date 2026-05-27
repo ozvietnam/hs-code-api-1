@@ -15,6 +15,8 @@
     "test:tariff": "node scripts/test-tariff-mutations.mjs",
     "test:gir-notes": "node scripts/test-gir-notes.mjs",
     "test:gir-engine": "node scripts/test-gir-engine.mjs",
+    "test:gir-tree": "node scripts/test-gir-tree.mjs",
+    "test:precedent-search": "node scripts/test-precedent-search.mjs",
     "data:build-specificity": "node scripts/build-specificity.mjs",
     "data:extract-legal-refs": "node scripts/extract-legal-refs.mjs"
   }

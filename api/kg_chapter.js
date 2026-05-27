@@ -1,6 +1,7 @@
 const { requireAuth } = require('../lib/auth');
 const { setCors, handleOptions } = require('../lib/cors');
 const { taxData } = require('../lib/data');
+const { buildChapterTree } = require('../lib/tree-metadata');
 
 module.exports = function handler(req, res) {
   setCors(res);
@@ -19,6 +20,20 @@ module.exports = function handler(req, res) {
   }
 
   const chapter = String(parseInt(chapterRaw, 10)).padStart(2, '0');
+  const treeMode = req.query.tree === '1' || req.query.tree === 'true';
+
+  if (treeMode) {
+    const payload = buildChapterTree(chapter);
+    if (payload.total === 0) {
+      return res.status(404).json({
+        found: false,
+        chapter,
+        message: `No HS codes for chapter ${chapter}`,
+      });
+    }
+    return res.status(200).json({ found: true, ...payload });
+  }
+
   const items = Object.values(taxData)
     .filter((row) => row.hs.startsWith(chapter))
     .map((row) => ({
