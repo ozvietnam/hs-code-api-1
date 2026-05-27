@@ -46,6 +46,13 @@ openssl rand -hex 32
 | `/api/versions` | GET | Yes | Tariff snapshot index |
 | `/api/version?id=` | GET | Yes | One snapshot metadata |
 | `/api/version/diff?from=&to=` | GET | Yes | Diff two snapshots |
+| `/api/admin/overview` | GET | Yes | Aggregated KPIs for `/admin` dashboard |
+
+## Admin dashboard
+
+- **URL:** `/admin` — read-only operator UI (paste Bearer token; optional one-time `?token=` then stored in `localStorage`).
+- **Data:** `GET /api/admin/overview` aggregates health, tariff coverage, feedback file summary, version index, and knowledge layer counts.
+- **Follow-up:** request logging for “today stats” (see `todayStats.note` in JSON).
 
 ## Examples
 

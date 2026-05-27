@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HS Admin — Stats</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #fff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --ok: #16a34a;
+      --bad: #dc2626;
+      --accent: #2563eb;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #60a5fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    h1 { font-size: 1.125rem; margin: 0; font-weight: 600; flex: 1 1 auto; min-width: 8rem; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    input[type="password"], input[type="text"] {
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      background: var(--bg);
+      color: var(--text);
+      min-width: 12rem;
+    }
+    button {
+      padding: 0.45rem 0.85rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    main { padding: 1rem; max-width: 1200px; margin: 0 auto; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    section.card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    section.card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .skeleton {
+      animation: pulse 1.5s ease-in-out infinite;
+      background: linear-gradient(
+        90deg,
+        var(--border) 0%,
+        color-mix(in srgb, var(--border), var(--muted) 20%) 50%,
+        var(--border) 100%
+      );
+      background-size: 200% 100%;
+      border-radius: 0.25rem;
+      height: 0.875rem;
+      margin: 0.35rem 0;
+    }
+    @keyframes pulse {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    dl { margin: 0; font-size: 0.875rem; }
+    dt { color: var(--muted); margin-top: 0.5rem; }
+    dd { margin: 0.15rem 0 0; font-variant-numeric: tabular-nums; }
+    .badge { font-size: 0.75rem; padding: 0.15rem 0.4rem; border-radius: 0.25rem; border: 1px solid var(--border); }
+    .badge.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok), var(--border) 40%); }
+    .badge.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad), var(--border) 40%); }
+    .err { padding: 0.75rem; background: color-mix(in srgb, var(--bad), transparent 92%); border-radius: 0.375rem; font-size: 0.875rem; }
+    ul.compact { margin: 0; padding-left: 1.1rem; font-size: 0.8125rem; }
+    footer { padding: 1rem; color: var(--muted); font-size: 0.75rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HS API — Operator dashboard</h1>
+    <div class="toolbar">
+      <input id="token" type="password" autocomplete="current-password" placeholder="Bearer token" aria-label="API token" />
+      <button type="button" class="primary" id="save-token">Save &amp; load</button>
+      <button type="button" id="theme-toggle" aria-label="Toggle dark mode">Theme</button>
+    </div>
+  </header>
+  <main>
+    <p id="error" class="err" hidden></p>
+    <div id="loading" class="grid" aria-busy="true">
+      <section class="card"><h2>System health</h2><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></section>
+      <section class="card"><h2>Today stats</h2><div class="skeleton"></div><div class="skeleton"></div></section>
+      <section class="card"><h2>Feedback queue</h2><div class="skeleton"></div><div class="skeleton"></div></section>
+      <section class="card"><h2>Tariff coverage</h2><div class="skeleton"></div><div class="skeleton"></div></section>
+      <section class="card"><h2>Recent updates</h2><div class="skeleton"></div><div class="skeleton"></div></section>
+      <section class="card"><h2>Knowledge layers</h2><div class="skeleton"></div><div class="skeleton"></div></section>
+    </div>
+    <div id="content" class="grid" hidden></div>
+  </main>
+  <footer>Read-only overview via <code>/api/admin/overview</code>. Tokens stay in browser localStorage.</footer>
+  <script>
+    var TOKEN_KEY = 'hs_admin_hs_api_token';
+
+    function getBase() {
+      return window.location.origin;
+    }
+
+    function getToken() {
+      var fromQuery = new URLSearchParams(location.search).get('token');
+      if (fromQuery) localStorage.setItem(TOKEN_KEY, fromQuery);
+      return localStorage.getItem(TOKEN_KEY) || '';
+    }
+
+    function badge(ok) {
+      return '<span class="badge ' + (ok ? 'ok' : 'bad') + '">' + (ok ? 'OK' : 'missing') + '</span>';
+    }
+
+    function setTheme(pref) {
+      if (pref === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      else document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('hs_admin_theme', pref);
+    }
+
+    function toggleTheme() {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(dark ? 'light' : 'dark');
+    }
+
+    function showError(message) {
+      var el = document.getElementById('error');
+      el.textContent = message;
+      el.hidden = false;
+    }
+
+    function clearError() {
+      var el = document.getElementById('error');
+      el.hidden = true;
+      el.textContent = '';
+    }
+
+    function render(data) {
+      var h = data.systemHealth || {};
+      var ch = (h.checks || {});
+      var tc = data.tariffCoverage || {};
+      var fb = data.feedbackQueue || {};
+      var ts = data.todayStats || {};
+      var ru = data.recentUpdates || {};
+      var kl = data.knowledgeLayers || {};
+
+      var sys =
+        '<section class="card"><h2>System health</h2>' +
+        '<dl><dt>Gemini API key</dt><dd>' + badge(ch.geminiKey && ch.geminiKey.ok) + '</dd>' +
+        '<dt>Bearer HS_API_TOKEN</dt><dd>' + badge(ch.apiToken && ch.apiToken.ok) + '</dd>' +
+        '<dt>HS codes</dt><dd>' + (h.totalHsCodes ?? '—') + '</dd>' +
+        '<dt>Chapters</dt><dd>' + (h.chapters ?? '—') + '</dd>' +
+        '<dt>Rows with CS policy copy</dt><dd>' + (h.withPolicyWarnings ?? '—') + '</dd>' +
+        '<dt>Last enriched (policy JSON mtime)</dt><dd>' + (h.lastEnrichedAt ?? '—') + '</dd></dl></section>';
+
+      var today =
+        '<section class="card"><h2>Today stats</h2>' +
+        '<dl><dt>Requests today</dt><dd>' +
+        (ts.requestsToday === null ? '— (not wired)' : ts.requestsToday) +
+        '</dd><dt>p90 latency</dt><dd>' +
+        (ts.latencyP90Ms === null ? '— (not wired)' : ts.latencyP90Ms + ' ms') +
+        '</dd><dt>Note</dt><dd>' +
+        escapeHtml(ts.note || '') +
+        '</dd></dl></section>';
+
+      var byTypeHtml = '';
+      try {
+        for (var t in fb.byType) {
+          byTypeHtml += escapeHtml(t) + ': ' + fb.byType[t] + '; ';
+        }
+      } catch (e) {}
+      var fbList = (fb.recent || []).slice(0, 5)
+        .map(function (row) {
+          return '<li><code>' + escapeHtml(row.feedbackType || '') + '</code> — ' +
+            escapeHtml(String(row.hsCodeAtTime || row.correctedHsCode || '').slice(0, 80)) +
+            '</li>';
+        })
+        .join('');
+
+      var feedback =
+        '<section class="card"><h2>Feedback queue</h2>' +
+        '<dl><dt>Recorded events (disk)</dt><dd>' + (fb.total ?? 0) + '</dd>' +
+        '<dt>Breakdown</dt><dd>' + (byTypeHtml || '—') + '</dd></dl>' +
+        (fbList ? '<ul class="compact">' + fbList + '</ul>' : '') +
+        '<p style="margin:0.5rem 0 0;font-size:0.75rem;color:var(--muted)">' +
+        'Queued review count matches file size on server.</p></section>';
+
+      var cov =
+        '<section class="card"><h2>Tariff coverage</h2>' +
+        '<dl><dt>% MFN filled</dt><dd>' + (tc.pctMfn ?? 0) + '%</dd>' +
+        '<dt>% ACFTA filled</dt><dd>' + (tc.pctAcfta ?? 0) + '%</dd>' +
+        '<dt>% VAT filled</dt><dd>' + (tc.pctVat ?? 0) + '%</dd>' +
+        '<dt>% BVMT filled</dt><dd>' + (tc.pctBvmt ?? 0) + '%</dd>' +
+        '<dt>% nameEn (Issue #6)</dt><dd>' + (tc.pctNameEn ?? 0) + '% — not loaded yet</dd>' +
+        '<dt>% HS with enriched warnings</dt><dd>' + (tc.pctEnrichedWarnings ?? 0) + '%</dd>' +
+        '<dt>Enriched policy rows (tax-enriched.json)</dt><dd>' + (tc.enrichedWarnings ?? 0) +
+        '</dd></dl></section>';
+
+      var vers = (ru.versions || [])
+        .map(function (v) {
+          return '<li><strong>' + escapeHtml(v.id || '') + '</strong> · ' +
+            escapeHtml(v.file || '') + ' · ' + (v.rowCount || '—') + ' rows · ' +
+            escapeHtml(v.createdAt || v.effectiveDate || '') + '</li>';
+        })
+        .join('');
+      var updates =
+        '<section class="card"><h2>Recent updates</h2>' +
+        '<dl><dt>Current version id</dt><dd>' +
+        escapeHtml(ru.currentTariffVersion || '—') + '</dd>' +
+        '<dt>Versions in index</dt><dd>' + (ru.tariffVersions ?? 0) + '</dd>' +
+        '<dt>Last enrichment job (file)</dt><dd>' + escapeHtml(ru.lastEnrichedAt || '—') + '</dd>' +
+        '</dl>' +
+        (vers ? '<ul class="compact">' + vers + '</ul>' : '') + '</section>';
+
+      var know =
+        '<section class="card"><h2>Knowledge layers</h2>' +
+        '<dl><dt>Explanatory notes HS</dt><dd>' + (kl.explanatoryNotes ?? 0) + '</dd>' +
+        '<dt>Precedent HS</dt><dd>' + (kl.precedentHsCodes ?? 0) + '</dd>' +
+        '<dt>Conflict HS</dt><dd>' + (kl.conflictHsCodes ?? 0) + '</dd></dl></section>';
+
+      return sys + today + feedback + cov + updates + know;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function loadOverview() {
+      clearError();
+      document.getElementById('loading').hidden = false;
+      document.getElementById('content').hidden = true;
+
+      var token = getToken();
+      document.getElementById('token').value = token;
+
+      try {
+        var res = await fetch(getBase() + '/api/admin/overview', {
+          headers: { Authorization: 'Bearer ' + token },
+        });
+        if (!res.ok) {
+          var bodyText = '';
+          try { bodyText = await res.text(); } catch (e) {}
+          if (res.status === 401) showError('Unauthorized — kiểm tra token (không lưu trên URL sau khi lưu).');
+          else if (res.status === 503) showError('Service misconfigured hoặc thiếu HS_API_TOKEN trên server.');
+          else showError('Lỗi ' + res.status + (bodyText ? ': ' + bodyText.slice(0, 240) : ''));
+          return;
+        }
+        var data = await res.json();
+        document.getElementById('loading').hidden = true;
+        var wrap = document.getElementById('content');
+        wrap.innerHTML = render(data);
+        wrap.hidden = false;
+      } catch (e) {
+        showError('Network: ' + (e && e.message ? e.message : 'failed'));
+      } finally {
+        document.getElementById('loading').hidden = true;
+      }
+    }
+
+    document.getElementById('save-token').addEventListener('click', function () {
+      localStorage.setItem(TOKEN_KEY, document.getElementById('token').value.trim());
+      loadOverview();
+    });
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+    window.addEventListener('DOMContentLoaded', function () {
+      var pref = localStorage.getItem('hs_admin_theme');
+      setTheme(pref === 'dark' ? 'dark' : 'light');
+      loadOverview();
+    });
+  </script>
+</body>
+</html>
