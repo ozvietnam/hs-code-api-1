@@ -13,6 +13,7 @@
     "test:describe": "node scripts/test-describe.mjs",
     "test:customs-types": "node scripts/test-customs-types.mjs",
     "test:tariff": "node scripts/test-tariff-mutations.mjs",
+    "test:gir-notes": "node scripts/test-gir-notes.mjs",
     "data:extract-legal-refs": "node scripts/extract-legal-refs.mjs"
   }
 }

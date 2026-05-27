@@ -1,0 +1,25 @@
+{
+  "sections": [
+    { "code": "I", "titleVi": "Động vật sống và sản phẩm động vật", "chapters": ["01", "02", "03", "04", "05"] },
+    { "code": "II", "titleVi": "Sản phẩm thực vật", "chapters": ["06", "07", "08", "09", "10", "11", "12", "13", "14"] },
+    { "code": "III", "titleVi": "Mỡ động vật, thực vật hoặc vi sinh vật và sản phẩm tách dầu", "chapters": ["15"] },
+    { "code": "IV", "titleVi": "Thực phẩm chế biến; đồ uống, rượu và giấm; thuốc lá", "chapters": ["16", "17", "18", "19", "20", "21", "22", "23", "24"] },
+    { "code": "V", "titleVi": "Sản phẩm khoáng", "chapters": ["25", "26", "27"] },
+    { "code": "VI", "titleVi": "Sản phẩm hóa chất và công nghiệp hóa chất liên quan", "chapters": ["28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"] },
+    { "code": "VII", "titleVi": "Plastic và các sản phẩm bằng plastic; cao su và các sản phẩm bằng cao su", "chapters": ["39", "40"] },
+    { "code": "VIII", "titleVi": "Da thuộc, da lông, vali, túi xách và sản phẩm tương tự", "chapters": ["41", "42", "43"] },
+    { "code": "IX", "titleVi": "Gỗ, than gỗ, gốm sứ, thủy tinh và sản phẩm tương tự", "chapters": ["44", "45", "46"] },
+    { "code": "X", "titleVi": "Bột giấy, giấy và bìa; sản phẩm bằng giấy hoặc bìa", "chapters": ["47", "48", "49"] },
+    { "code": "XI", "titleVi": "Sản phẩm dệt và dệt may", "chapters": ["50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"] },
+    { "code": "XII", "titleVi": "Giày dép, mũ, dù, gậy và sản phẩm tương tự", "chapters": ["64", "65", "66", "67"] },
+    { "code": "XIII", "titleVi": "Đá, thạch cao, xi măng, gốm sứ và thủy tinh", "chapters": ["68", "69", "70"] },
+    { "code": "XIV", "titleVi": "Ngọc trai, đá quý, kim loại quý và đồ trang sức", "chapters": ["71"] },
+    { "code": "XV", "titleVi": "Kim loại cơ bản và sản phẩm bằng kim loại cơ bản", "chapters": ["72", "73", "74", "75", "76", "78", "79", "80", "81", "82", "83"] },
+    { "code": "XVI", "titleVi": "Máy móc, thiết bị điện và bộ phận; âm thanh và hình ảnh", "chapters": ["84", "85"] },
+    { "code": "XVII", "titleVi": "Phương tiện vận tải", "chapters": ["86", "87", "88", "89"] },
+    { "code": "XVIII", "titleVi": "Dụng cụ quang học, y tế, đo lường và đồng hồ", "chapters": ["90", "91", "92"] },
+    { "code": "XIX", "titleVi": "Vũ khí và đạn dược", "chapters": ["93"] },
+    { "code": "XX", "titleVi": "Hàng hóa sản xuất khác", "chapters": ["94", "95", "96"] },
+    { "code": "XXI", "titleVi": "Tác phẩm nghệ thuật, đồ sưu tầm và đồ cổ", "chapters": ["97"] }
+  ]
+}

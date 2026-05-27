@@ -5,6 +5,7 @@ const { loadIndex } = require('../lib/tariff-versions');
 const { enrichedEntryCount } = require('../lib/enriched-data');
 const { buildAdminOverview } = require('../lib/admin-overview');
 const { getDocByCode, listDocs } = require('../lib/legal-docs');
+const { getNotesCoverage } = require('../lib/gir-notes');
 const fs = require('fs');
 const path = require('path');
 
@@ -40,6 +41,7 @@ function kgStatsPayload() {
     tariffVersions: versionIndex.versions.length,
     currentTariffVersion: versionIndex.current || null,
     lastEnrichedAt,
+    notesCoverage: getNotesCoverage(),
   };
 }
 
