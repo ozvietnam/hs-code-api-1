@@ -1,0 +1,30 @@
+{
+  "version": "2026-01",
+  "chapters": {
+    "84": {
+      "titleVi": "Máy móc, thiết bị cơ khí",
+      "requiredAttributes": ["function", "powerOrCapacity"],
+      "girHints": ["Chức năng chính quyết định phân nhóm 84.xx", "Phân biệt bộ phận riêng lẻ vs máy hoàn chỉnh"]
+    },
+    "85": {
+      "titleVi": "Máy móc, thiết bị điện",
+      "requiredAttributes": ["function", "voltage", "connectivity"],
+      "girHints": ["Điện thoại thông minh thường 8517", "Phân biệt linh kiện vs thiết bị hoàn chỉnh"]
+    },
+    "87": {
+      "titleVi": "Phương tiện giao thông",
+      "requiredAttributes": ["vehicleType", "engineDisplacementOrPower", "newOrUsed"],
+      "girHints": ["Xe mô tô vs ô tô", "CKD/SKD cần mô tả mức lắp ráp"]
+    },
+    "39": {
+      "titleVi": "Nhựa và sản phẩm nhựa",
+      "requiredAttributes": ["polymerType", "form", "primaryUse"],
+      "girHints": ["Phân biệt dạng primary vs sản phẩm thành phẩm"]
+    },
+    "72": {
+      "titleVi": "Sắt thép",
+      "requiredAttributes": ["alloyStatus", "form", "dimensions"],
+      "girHints": ["Thép hợp kim vs không hợp kim", "Dạng phôi vs thành phẩm"]
+    }
+  }
+}

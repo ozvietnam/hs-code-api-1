@@ -1,0 +1,31 @@
+name: Search regression
+
+on:
+  push:
+    paths:
+      - 'lib/search-utils.js'
+      - 'lib/search-query-expand.js'
+      - 'data/brand-product-map.json'
+      - 'data/english-product-map.json'
+      - 'data/vn-product-synonyms.json'
+      - 'tests/search-cases.json'
+      - 'data/search.json'
+  pull_request:
+    paths:
+      - 'lib/search-utils.js'
+      - 'lib/search-query-expand.js'
+      - 'data/brand-product-map.json'
+      - 'data/english-product-map.json'
+      - 'data/vn-product-synonyms.json'
+      - 'tests/search-cases.json'
+      - 'data/search.json'
+
+jobs:
+  test-search:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm run test:search

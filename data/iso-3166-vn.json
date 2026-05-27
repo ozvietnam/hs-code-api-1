@@ -1,0 +1,25 @@
+{
+  "version": "2026-01",
+  "countries": [
+    { "alpha2": "VN", "alpha3": "VNM", "numeric": "704", "nameVi": "Việt Nam", "nameEn": "Viet Nam" },
+    { "alpha2": "CN", "alpha3": "CHN", "numeric": "156", "nameVi": "Trung Quốc", "nameEn": "China" },
+    { "alpha2": "US", "alpha3": "USA", "numeric": "840", "nameVi": "Hoa Kỳ", "nameEn": "United States" },
+    { "alpha2": "JP", "alpha3": "JPN", "numeric": "392", "nameVi": "Nhật Bản", "nameEn": "Japan" },
+    { "alpha2": "KR", "alpha3": "KOR", "numeric": "410", "nameVi": "Hàn Quốc", "nameEn": "Korea, Republic of" },
+    { "alpha2": "TH", "alpha3": "THA", "numeric": "764", "nameVi": "Thái Lan", "nameEn": "Thailand" },
+    { "alpha2": "SG", "alpha3": "SGP", "numeric": "702", "nameVi": "Singapore", "nameEn": "Singapore" },
+    { "alpha2": "MY", "alpha3": "MYS", "numeric": "458", "nameVi": "Malaysia", "nameEn": "Malaysia" },
+    { "alpha2": "ID", "alpha3": "IDN", "numeric": "360", "nameVi": "Indonesia", "nameEn": "Indonesia" },
+    { "alpha2": "IN", "alpha3": "IND", "numeric": "356", "nameVi": "Ấn Độ", "nameEn": "India" },
+    { "alpha2": "DE", "alpha3": "DEU", "numeric": "276", "nameVi": "Đức", "nameEn": "Germany" },
+    { "alpha2": "FR", "alpha3": "FRA", "numeric": "250", "nameVi": "Pháp", "nameEn": "France" },
+    { "alpha2": "GB", "alpha3": "GBR", "numeric": "826", "nameVi": "Vương quốc Anh", "nameEn": "United Kingdom" },
+    { "alpha2": "TW", "alpha3": "TWN", "numeric": "158", "nameVi": "Đài Loan", "nameEn": "Taiwan" },
+    { "alpha2": "HK", "alpha3": "HKG", "numeric": "344", "nameVi": "Hồng Kông", "nameEn": "Hong Kong" },
+    { "alpha2": "AU", "alpha3": "AUS", "numeric": "036", "nameVi": "Úc", "nameEn": "Australia" },
+    { "alpha2": "RU", "alpha3": "RUS", "numeric": "643", "nameVi": "Liên bang Nga", "nameEn": "Russian Federation" },
+    { "alpha2": "IT", "alpha3": "ITA", "numeric": "380", "nameVi": "Ý", "nameEn": "Italy" },
+    { "alpha2": "ES", "alpha3": "ESP", "numeric": "724", "nameVi": "Tây Ban Nha", "nameEn": "Spain" },
+    { "alpha2": "NL", "alpha3": "NLD", "numeric": "528", "nameVi": "Hà Lan", "nameEn": "Netherlands" }
+  ]
+}

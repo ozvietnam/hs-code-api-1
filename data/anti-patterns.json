@@ -1,0 +1,29 @@
+{
+  "version": "2026-01",
+  "patterns": [
+    {
+      "id": "marketing-only",
+      "description": "Mô tả chỉ gồm tên thương mại / model không có chức năng",
+      "example": "iPhone 15 Pro Max 256GB",
+      "fix": "Bổ sung chức năng: điện thoại thông minh, dung lượng lưu trữ"
+    },
+    {
+      "id": "mixed-goods-set",
+      "description": "Bộ hàng nhiều chủng loại không nêu hàng chiếm ưu thế",
+      "example": "Bộ quà tặng gồm bình nước + túi + sổ",
+      "fix": "Xác định hàng chiếm ưu thế theo GIR 3(b) hoặc tách dòng khai báo"
+    },
+    {
+      "id": "wrong-unit",
+      "description": "Đơn vị tính không khớp chương HS",
+      "example": "Khai PCE cho dây đồng cuộn theo mét",
+      "fix": "Tra units-tchq.json và mô tả quy cách đóng gói"
+    },
+    {
+      "id": "origin-missing",
+      "description": "Thiếu xuất xứ khi áp dụng thuế ưu đãi FTA",
+      "example": "Hàng từ CN nhưng không có C/O Form E",
+      "fix": "Khai mã nước ISO alpha-2 và chứng từ xuất xứ"
+    }
+  ]
+}

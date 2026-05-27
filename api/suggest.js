@@ -2,9 +2,11 @@ const { requireAuth } = require('../lib/auth');
 const { setCors, handleOptions } = require('../lib/cors');
 const { searchCandidates } = require('../lib/search-utils');
 const { geminiGenerateJson } = require('../lib/gemini');
+const { buildEvidenceTrace } = require('../lib/suggest-evidence');
 
 const SYSTEM_PROMPT = `Bạn là chuyên gia phân loại hàng hóa hải quan Việt Nam.
 Cho mô tả hàng hóa và danh sách mã HS candidate, hãy chọn tối đa 3 mã phù hợp nhất.
+Áp dụng GIR và gợi ý chương (girRulesApplied) khi giải thích.
 Chỉ trả JSON đúng schema:
 {
   "suggestions": [
@@ -13,7 +15,8 @@ Chỉ trả JSON đúng schema:
       "nameVi": "Tên hàng",
       "confidence": 92,
       "reasoning": "Giải thích ngắn",
-      "disambiguationFeatures": ["brand", "model"]
+      "disambiguationFeatures": ["brand", "model"],
+      "girRulesApplied": ["GIR 1", "Chương 85: thiết bị điện hoàn chỉnh"]
     }
   ]
 }
@@ -45,11 +48,15 @@ module.exports = async function handler(req, res) {
   const topCandidates = Math.min(Math.max(parseInt(body?.options?.topCandidates, 10) || 10, 3), 20);
   const topReranked = Math.min(Math.max(parseInt(body?.options?.topReranked, 10) || 3, 1), 5);
   const evidence = searchCandidates(description, { topCandidates });
+  const audit = buildEvidenceTrace(description, evidence);
 
   if (evidence.length === 0) {
     return res.status(200).json({
       suggestions: [],
       evidence: [],
+      evidenceTrace: [],
+      girRulesApplied: audit.girRulesApplied,
+      antiPatternWarnings: audit.antiPatternWarnings,
       llmModel: null,
       ms: Date.now() - started,
       message: 'No candidates found in tariff index',
@@ -66,6 +73,8 @@ module.exports = async function handler(req, res) {
           policyByHs,
           score,
         })),
+        girRulesApplied: audit.girRulesApplied,
+        antiPatternWarnings: audit.antiPatternWarnings,
         topReranked,
       },
       null,
@@ -83,7 +92,15 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       suggestions,
-      evidence: evidence.map(({ hsCode, source, score }) => ({ hsCode, source, score })),
+      evidence: evidence.map(({ hsCode, source, score, queryExpansion }) => ({
+        hsCode,
+        source,
+        score,
+        queryExpansion,
+      })),
+      evidenceTrace: audit.evidenceTrace,
+      girRulesApplied: audit.girRulesApplied,
+      antiPatternWarnings: audit.antiPatternWarnings,
       llmModel: model,
       ms,
     });

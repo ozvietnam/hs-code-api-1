@@ -1,0 +1,25 @@
+{
+  "version": "2026-01",
+  "units": [
+    { "code": "PCE", "nameVi": "Cái / Chiếc", "nameEn": "Piece", "decimals": 0 },
+    { "code": "SET", "nameVi": "Bộ", "nameEn": "Set", "decimals": 0 },
+    { "code": "KGM", "nameVi": "Kilogram", "nameEn": "Kilogram", "decimals": 3 },
+    { "code": "GRM", "nameVi": "Gam", "nameEn": "Gram", "decimals": 3 },
+    { "code": "TNE", "nameVi": "Tấn", "nameEn": "Metric ton", "decimals": 3 },
+    { "code": "LTR", "nameVi": "Lít", "nameEn": "Litre", "decimals": 3 },
+    { "code": "MTR", "nameVi": "Mét", "nameEn": "Metre", "decimals": 3 },
+    { "code": "MTK", "nameVi": "Mét vuông", "nameEn": "Square metre", "decimals": 3 },
+    { "code": "MTQ", "nameVi": "Mét khối", "nameEn": "Cubic metre", "decimals": 3 },
+    { "code": "MMT", "nameVi": "Milimet", "nameEn": "Millimetre", "decimals": 3 },
+    { "code": "PR", "nameVi": "Đôi", "nameEn": "Pair", "decimals": 0 },
+    { "code": "DZN", "nameVi": "Tá", "nameEn": "Dozen", "decimals": 0 },
+    { "code": "NPR", "nameVi": "Số lượng", "nameEn": "Number of pairs", "decimals": 0 },
+    { "code": "KWH", "nameVi": "Kilowatt giờ", "nameEn": "Kilowatt hour", "decimals": 3 },
+    { "code": "LPA", "nameVi": "Lít cồn tuyệt đối", "nameEn": "Litre pure alcohol", "decimals": 3 },
+    { "code": "CTM", "nameVi": "Carat", "nameEn": "Carat", "decimals": 3 },
+    { "code": "BBL", "nameVi": "Thùng dầu", "nameEn": "Barrel", "decimals": 3 },
+    { "code": "ROL", "nameVi": "Cuộn", "nameEn": "Roll", "decimals": 0 },
+    { "code": "BAG", "nameVi": "Bao", "nameEn": "Bag", "decimals": 0 },
+    { "code": "BOX", "nameVi": "Hộp", "nameEn": "Box", "decimals": 0 }
+  ]
+}

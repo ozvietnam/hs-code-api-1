@@ -8,6 +8,7 @@
     "data:snapshot-tax": "node scripts/tariff-snapshot.mjs",
     "data:diff-tax": "node scripts/tariff-diff.mjs",
     "data:rollback-tax": "node scripts/tariff-rollback.mjs",
-    "data:enrich-policies": "node scripts/enrich-policies.mjs"
+    "data:enrich-policies": "node scripts/enrich-policies.mjs",
+    "test:search": "node scripts/test-search.mjs"
   }
 }

@@ -1,0 +1,17 @@
+[
+  { "id": "hs-prefix", "query": "8517", "minResults": 1 },
+  { "id": "vietnamese-phone", "query": "điện thoại", "minResults": 3 },
+  { "id": "iphone-en", "query": "iPhone", "minResults": 1, "topHsPrefix": "85" },
+  { "id": "macbook-en", "query": "MacBook Pro M3", "minResults": 1, "topHsPrefix": "84" },
+  { "id": "washer-brand", "query": "máy giặt Toshiba 8kg", "minResults": 1, "topHsPrefix": "84" },
+  { "id": "fridge-vn", "query": "tủ lạnh", "minResults": 3, "topHsPrefix": "84" },
+  { "id": "side-by-side", "query": "tủ lạnh side-by-side", "minResults": 1, "topHsPrefix": "84" },
+  { "id": "samsung-tv", "query": "Samsung TV 55 inch", "minResults": 1, "topHsPrefix": "85" },
+  { "id": "pump-vn", "query": "máy bơm nước", "minResults": 1, "topHsPrefix": "84" },
+  { "id": "laptop-en", "query": "laptop Dell", "minResults": 1, "topHsPrefix": "84" },
+  { "id": "aircon", "query": "máy điều hòa Daikin", "minResults": 1, "topHsPrefix": "84" },
+  { "id": "motorcycle", "query": "xe máy Honda", "minResults": 1 },
+  { "id": "steel", "query": "thép không gỉ", "minResults": 1, "topHsPrefix": "72" },
+  { "id": "plastic", "query": "ống nhựa PVC", "minResults": 1 },
+  { "id": "shoes", "query": "giày thể thao Nike", "minResults": 1 }
+]
