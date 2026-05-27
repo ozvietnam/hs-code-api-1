@@ -7,6 +7,9 @@ data/versions/*.json
 !data/versions/index.json
 !data/versions/tax-v2026-01-01-base.json
 
+# Runtime access telemetry (ephemeral on Vercel)
+data/access-log.jsonl
+
 # Env
 .env
 .env.*

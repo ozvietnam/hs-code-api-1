@@ -4,6 +4,7 @@ const { taxData } = require('../lib/data');
 const { mapSearchResult } = require('../lib/tax-mapper');
 const { searchCandidates } = require('../lib/search-utils');
 const { matchProducts } = require('../lib/product-match');
+const { appendAccess } = require('../lib/access-log');
 
 function parseBody(req) {
   let body = req.body;
@@ -28,8 +29,15 @@ function handleMatch(req, res) {
     return res.status(400).json({ error: 'Invalid JSON body' });
   }
 
+  const started = Date.now();
   try {
     const payload = matchProducts(body);
+    appendAccess({
+      route: '/api/match',
+      ms: Date.now() - started,
+      querySnippet: String(body.titleVi || body.titleZh || '').slice(0, 80),
+      hsCode: payload.matches?.[0]?.hsCode || null,
+    });
     return res.status(200).json(payload);
   } catch (error) {
     if (error.code === 'VALIDATION') {
@@ -63,7 +71,14 @@ module.exports = function handler(req, res) {
 
   const limitNum = Math.min(parseInt(limit, 10) || 20, 50);
   const onlyCS = cs_only === '1' || cs_only === 'true';
+  const started = Date.now();
   const candidates = searchCandidates(q, { topCandidates: limitNum, csOnly: onlyCS });
+  appendAccess({
+    route: '/api/search',
+    ms: Date.now() - started,
+    querySnippet: String(q).slice(0, 80),
+    hsCode: candidates[0]?.hsCode || null,
+  });
   const results = candidates.map((item) => {
     const full = taxData[item.hsCode] || {};
     return mapSearchResult(

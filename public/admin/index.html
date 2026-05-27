@@ -252,11 +252,27 @@
         '</dl>' +
         (vers ? '<ul class="compact">' + vers + '</ul>' : '') + '</section>';
 
+      var nc = kl.notesCoverage || {};
+      var mat = (kl.materialTaxonomyFamilies || [])
+        .map(function (f) { return f.family + ': ' + f.count; })
+        .join(', ');
+      var topHs = (ts.topQueriedHs || [])
+        .map(function (row) {
+          return '<li><code>' + escapeHtml(row.hsCode) + '</code> — ' + row.count + '</li>';
+        })
+        .join('');
+      var todayBlock = today;
+      if (topHs) {
+        todayBlock = today.replace('</dl></section>', '</dl><ul class="compact">' + topHs + '</ul></section>');
+      }
+
       var know =
         '<section class="card"><h2>Knowledge layers</h2>' +
         '<dl><dt>Explanatory notes HS</dt><dd>' + (kl.explanatoryNotes ?? 0) + '</dd>' +
         '<dt>Precedent HS</dt><dd>' + (kl.precedentHsCodes ?? 0) + '</dd>' +
-        '<dt>Conflict HS</dt><dd>' + (kl.conflictHsCodes ?? 0) + '</dd></dl></section>';
+        '<dt>Conflict HS</dt><dd>' + (kl.conflictHsCodes ?? 0) + '</dd>' +
+        '<dt>GIR notes coverage %</dt><dd>' + (nc.pctOfTarget ?? '—') + '%</dd>' +
+        '<dt>Material taxonomy</dt><dd>' + escapeHtml(mat || '—') + '</dd></dl></section>';
 
       var catalog =
         '<section class="card"><h2>Data catalog</h2>' +
@@ -269,7 +285,7 @@
         escapeHtml(api.customsTypes || '') + ', ' + escapeHtml(api.legalDocs || '') +
         '</p></section>';
 
-      return sys + today + feedback + cov + updates + know + catalog;
+      return sys + todayBlock + feedback + cov + updates + know + catalog;
     }
 
     function escapeHtml(s) {
