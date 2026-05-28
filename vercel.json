@@ -19,7 +19,8 @@
     { "source": "/api/legal-docs", "destination": "/api/dataset?resource=legal_docs" },
     { "source": "/api/match", "destination": "/api/search?mode=match" },
     { "source": "/api/ministries", "destination": "/api/dataset?resource=ministries" },
-    { "source": "/api/materials", "destination": "/api/dataset?resource=materials" }
+    { "source": "/api/materials", "destination": "/api/dataset?resource=materials" },
+    { "source": "/api/chapters", "destination": "/api/dataset?resource=chapters" }
   ],
   "functions": {
     "api/**/*.js": {

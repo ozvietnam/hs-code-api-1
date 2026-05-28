@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const {
   listFeedback,
   reviewFeedback,
+  bulkReviewFeedback,
   detectRepeatedPatterns,
   FEEDBACK_PATH,
 } = require('../lib/feedback-store.js');
@@ -68,6 +69,12 @@ if (!fs.existsSync(promotionsPath)) {
 const patterns = detectRepeatedPatterns(2);
 if (!patterns.some((p) => p.fromHs === '85171200' && p.toHs === '85171300')) {
   console.error('FAIL pattern detection', patterns);
+  process.exit(1);
+}
+
+const bulk = bulkReviewFeedback(['fb_test2'], { action: 'reject', reviewedBy: 'test' });
+if (bulk.okCount !== 1) {
+  console.error('FAIL bulk reject', bulk);
   process.exit(1);
 }
 

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HS Browse</title>
+  <style>
+    :root { --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --accent:#2563eb; --warn:#ca8a04; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:0.75rem 1rem; background:var(--card); border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; position:sticky; top:0; z-index:5; }
+    header h1 { font-size:1rem; margin:0; flex:1; }
+    input, button, select { padding:0.4rem 0.55rem; border:1px solid var(--border); border-radius:0.35rem; font-size:0.875rem; }
+    button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    main { padding:1rem; max-width:1200px; margin:0 auto; }
+    .crumbs { font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; }
+    .crumbs a { color:var(--accent); cursor:pointer; }
+    .grid { display:grid; gap:0.65rem; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:0.5rem; padding:0.65rem; cursor:pointer; }
+    .card:hover { border-color:var(--accent); }
+    .card h3 { margin:0 0 0.25rem; font-size:0.95rem; }
+    .card p { margin:0; font-size:0.75rem; color:var(--muted); }
+    .badge { font-size:0.65rem; padding:0.1rem 0.3rem; border:1px solid var(--warn); color:var(--warn); border-radius:0.2rem; }
+    table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); font-size:0.8125rem; }
+    th, td { padding:0.45rem 0.5rem; border-bottom:1px solid var(--border); text-align:left; }
+    tr[data-hs] { cursor:pointer; }
+    tr[data-hs]:hover { background:color-mix(in srgb, var(--accent), transparent 92%); }
+    .tabs { display:flex; gap:0.35rem; flex-wrap:wrap; margin:0.75rem 0; }
+    .tabs button.active { background:var(--accent); color:#fff; }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:0.5rem; padding:0.75rem; min-height:8rem; font-size:0.8125rem; white-space:pre-wrap; }
+    .err { padding:0.65rem; background:#fee2e2; border-radius:0.35rem; font-size:0.875rem; }
+    .toolbar { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem; align-items:center; }
+    @media print { header .no-print { display:none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HS Browse</h1>
+    <a href="/admin/" class="no-print">Dashboard</a>
+    <input id="token" type="password" placeholder="Bearer token" class="no-print" />
+    <button type="button" class="primary no-print" id="save">Load</button>
+    <button type="button" class="no-print" id="print" hidden>Print</button>
+  </header>
+  <main>
+    <nav class="crumbs" id="crumbs"></nav>
+    <p id="error" class="err" hidden></p>
+    <div id="view"></div>
+  </main>
+  <script>
+    const PAGE = 50;
+    const tokenEl = document.getElementById('token');
+    const viewEl = document.getElementById('view');
+    const crumbsEl = document.getElementById('crumbs');
+    const errEl = document.getElementById('error');
+    const printBtn = document.getElementById('print');
+    let searchTimer;
+
+    if (localStorage.getItem('hs_admin_token')) tokenEl.value = localStorage.getItem('hs_admin_token');
+
+    function auth() {
+      const t = tokenEl.value.trim();
+      if (!t) throw new Error('Nhập Bearer token');
+      return { Authorization: 'Bearer ' + t };
+    }
+
+    async function api(path) {
+      const res = await fetch(path, { headers: auth() });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || j.message || res.statusText);
+      return j;
+    }
+
+    function route() {
+      const raw = location.hash.replace(/^#/, '') || '/';
+      const qm = raw.indexOf('?');
+      const path = qm >= 0 ? raw.slice(0, qm) : raw;
+      const search = qm >= 0 ? raw.slice(qm + 1) : '';
+      const parts = path.split('/').filter(Boolean);
+      const params = new URLSearchParams(search);
+      if (!parts.length) return { name: 'chapters', params };
+      if (parts[0] === 'c') return { name: 'chapter', chapter: parts[1], params };
+      if (parts[0] === 'hs') return { name: 'hs', hs: parts[1], params };
+      return { name: 'chapters', params };
+    }
+
+    function navHash(path) {
+      location.hash = path;
+      render();
+    }
+
+    function setCrumbs(items) {
+      crumbsEl.innerHTML = items.map((it, i) => {
+        if (i < items.length - 1) return '<a data-h="' + it.hash + '">' + it.label + '</a> → ';
+        return '<span>' + it.label + '</span>';
+      }).join('');
+      crumbsEl.querySelectorAll('a').forEach((a) => {
+        a.onclick = () => navHash(a.dataset.h);
+      });
+    }
+
+    async function renderChapters() {
+      setCrumbs([{ label: 'Chapters', hash: '/' }]);
+      printBtn.hidden = true;
+      viewEl.innerHTML = '<p>Đang tải chương…</p>';
+      const data = await api('/api/chapters');
+      viewEl.innerHTML = '<div class="grid"></div>';
+      const grid = viewEl.firstChild;
+      for (const ch of data.chapters) {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = '<h3>Ch. ' + parseInt(ch.chapter, 10) + '</h3><p>' + esc(ch.title) + '</p><p>' + ch.hsCount + ' mã' +
+          (ch.hasWarnings ? ' <span class="badge">cảnh báo</span>' : '') + '</p>';
+        card.onclick = () => navHash('/c/' + ch.chapter);
+        grid.appendChild(card);
+      }
+    }
+
+    async function renderChapter(chapter, page, q, warnOnly) {
+      setCrumbs([
+        { label: 'Chapters', hash: '/' },
+        { label: 'Ch. ' + parseInt(chapter, 10), hash: '/c/' + chapter },
+      ]);
+      printBtn.hidden = true;
+      const offset = (page - 1) * PAGE;
+      viewEl.innerHTML =
+        '<div class="toolbar no-print">' +
+        '<input id="q" placeholder="Lọc trong chương…" value="' + esc(q || '') + '" />' +
+        '<label><input type="checkbox" id="warnOnly" ' + (warnOnly ? 'checked' : '') + ' /> Chỉ có cảnh báo</label>' +
+        '</div><table><thead><tr><th>HS</th><th>Tên</th><th>ĐVT</th><th>MFN</th><th>VAT</th><th></th></tr></thead><tbody></tbody></table>' +
+        '<p id="pager" style="color:var(--muted);font-size:0.8rem"></p>';
+
+      const data = await api('/api/kg_chapter?chapter=' + encodeURIComponent(chapter));
+      let items = data.items || [];
+      if (q) {
+        const needle = q.toLowerCase();
+        items = items.filter((r) => (r.hsCode + r.nameVi).toLowerCase().includes(needle));
+      }
+      if (warnOnly) items = items.filter((r) => r.hasPolicyWarning);
+      const total = items.length;
+      const slice = items.slice(offset, offset + PAGE);
+      const tbody = viewEl.querySelector('tbody');
+      for (const r of slice) {
+        const tr = document.createElement('tr');
+        tr.dataset.hs = r.hsCode;
+        tr.innerHTML = '<td><code>' + r.hsCode + '</code></td><td>' + esc(r.nameVi) + '</td><td>' + esc(r.unitVi || '') +
+          '</td><td>' + esc(r.taxMFN ?? '') + '</td><td>' + esc(r.taxVAT ?? '') + '</td><td>' +
+          (r.hasPolicyWarning ? '<span class="badge">!</span>' : '') + '</td>';
+        tr.onclick = () => navHash('/hs/' + r.hsCode);
+        tbody.appendChild(tr);
+      }
+      const pager = viewEl.querySelector('#pager');
+      pager.innerHTML = '';
+      const prev = document.createElement('button');
+      prev.textContent = '← Trước';
+      prev.disabled = page <= 1;
+      prev.onclick = () => {
+        const params = new URLSearchParams({ page: String(page - 1), q: q || '', warn: warnOnly ? '1' : '0' });
+        navHash('/c/' + chapter + '?' + params.toString());
+      };
+      const next = document.createElement('button');
+      next.textContent = 'Sau →';
+      next.disabled = offset + PAGE >= total;
+      next.onclick = () => {
+        const params = new URLSearchParams({ page: String(page + 1), q: q || '', warn: warnOnly ? '1' : '0' });
+        navHash('/c/' + chapter + '?' + params.toString());
+      };
+      pager.append(prev, document.createTextNode(' Trang ' + page + ' — ' + slice.length + ' / ' + total + ' '), next);
+
+      const qEl = viewEl.querySelector('#q');
+      qEl.oninput = () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          const params = new URLSearchParams({ page: '1', q: qEl.value, warn: warnOnly ? '1' : '0' });
+          navHash('/c/' + chapter + '?' + params.toString());
+        }, 300);
+      };
+      viewEl.querySelector('#warnOnly').onchange = (e) => {
+        const params = new URLSearchParams({ page: '1', q: qEl.value, warn: e.target.checked ? '1' : '0' });
+        navHash('/c/' + chapter + '?' + params.toString());
+      };
+    }
+
+    async function renderHs(hs) {
+      setCrumbs([
+        { label: 'Chapters', hash: '/' },
+        { label: 'Ch. ' + parseInt(hs.slice(0, 2), 10), hash: '/c/' + hs.slice(0, 2) },
+        { label: hs, hash: '/hs/' + hs },
+      ]);
+      printBtn.hidden = false;
+      const tabs = ['Thuế', 'Chú giải', 'Tiền lệ', 'Cảnh báo', 'Conflict', 'Feedback'];
+      viewEl.innerHTML = '<h2 style="margin:0 0 0.5rem"><code>' + hs + '</code></h2><div class="tabs"></div><div class="panel" id="tabBody">Loading…</div>';
+      const tabBar = viewEl.querySelector('.tabs');
+      let active = 0;
+      tabs.forEach((label, i) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        if (i === 0) b.className = 'active';
+        b.onclick = () => {
+          active = i;
+          tabBar.querySelectorAll('button').forEach((x, j) => x.classList.toggle('active', j === i));
+          loadTab(i);
+        };
+        tabBar.appendChild(b);
+      });
+
+      async function loadTab(i) {
+        const body = viewEl.querySelector('#tabBody');
+        body.textContent = 'Loading…';
+        try {
+          if (i === 0) {
+            const t = await api('/api/tax?hs=' + hs);
+            body.textContent = JSON.stringify(t, null, 2);
+          } else if (i === 1) {
+            const n = await api('/api/notes?hs=' + hs + '&level=all');
+            body.textContent = JSON.stringify(n, null, 2);
+          } else if (i === 2) {
+            const p = await api('/api/precedents?hs=' + hs);
+            body.textContent = JSON.stringify(p, null, 2);
+          } else if (i === 3) {
+            const t = await api('/api/tax?hs=' + hs);
+            body.textContent = JSON.stringify({ warnings: t.warnings, policyText: t.cs }, null, 2);
+          } else if (i === 4) {
+            const c = await api('/api/conflicts?hs=' + hs);
+            body.textContent = JSON.stringify(c, null, 2);
+          } else {
+            const f = await api('/api/feedback?hsPrefix=' + hs + '&limit=50');
+            body.textContent = JSON.stringify(f, null, 2);
+          }
+        } catch (e) {
+          body.textContent = e.message;
+        }
+      }
+      loadTab(0);
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+
+    async function render() {
+      errEl.hidden = true;
+      try {
+        localStorage.setItem('hs_admin_token', tokenEl.value.trim());
+        const r = route();
+        if (r.name === 'chapters') return renderChapters();
+        if (r.name === 'chapter') {
+          return renderChapter(
+            r.chapter,
+            parseInt(r.params.get('page') || '1', 10),
+            r.params.get('q') || '',
+            r.params.get('warn') === '1',
+          );
+        }
+        if (r.name === 'hs') return renderHs(r.hs.replace(/\D/g, '').slice(0, 8));
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.hidden = false;
+      }
+    }
+
+    document.getElementById('save').onclick = render;
+    document.getElementById('print').onclick = () => window.print();
+    window.onhashchange = render;
+    render();
+  </script>
+</body>
+</html>

@@ -92,7 +92,10 @@
       <option value="rejected">rejected</option>
     </select>
     <button type="button" class="primary" id="reload">Reload</button>
+    <button type="button" id="bulk-approve">Bulk approve</button>
     <button type="button" id="export-csv">Export CSV</button>
+    <button type="button" id="prev-page">←</button>
+    <button type="button" id="next-page">→</button>
   </header>
   <main>
     <p id="error" class="err" hidden></p>
@@ -101,6 +104,7 @@
         <table>
           <thead>
             <tr>
+              <th><input type="checkbox" id="select-all" title="Select all on page" /></th>
               <th>Time</th>
               <th>Type</th>
               <th>HS change</th>
@@ -128,6 +132,9 @@
     const rowsEl = document.getElementById('rows');
     const metaEl = document.getElementById('meta');
     const patternsEl = document.getElementById('patterns');
+    let pageOffset = 0;
+    const pageLimit = 50;
+    let lastTotal = 0;
 
     const saved = localStorage.getItem('hs_admin_token');
     if (saved) tokenEl.value = saved;
@@ -160,12 +167,19 @@
       return `<a href="${base}/staff/orders/${encodeURIComponent(code)}" target="_blank" rel="noopener">${code}</a>`;
     }
 
+    function selectedIds() {
+      return [...rowsEl.querySelectorAll('input.row-check:checked')].map((el) => el.value);
+    }
+
     function renderRows(data) {
       rowsEl.innerHTML = '';
+      lastTotal = data.total || 0;
       for (const r of data.items || []) {
         const tr = document.createElement('tr');
         const hs = `${r.hsCodeAtTime || '—'} → ${r.correctedHsCode || '—'}`;
+        const canSelect = (r.status || 'pending') === 'pending';
         tr.innerHTML = `
+          <td>${canSelect ? '<input type="checkbox" class="row-check" value="' + r.feedbackId + '" />' : ''}</td>
           <td>${(r.createdAt || r.receivedAt || '').slice(0, 19)}</td>
           <td><span class="badge">${r.feedbackType || ''}</span></td>
           <td>${hs}</td>
@@ -189,7 +203,9 @@
         }
         rowsEl.appendChild(tr);
       }
-      metaEl.textContent = `Hiển thị ${(data.items || []).length} / ${data.total || 0}`;
+      metaEl.textContent = `Hiển thị ${pageOffset + 1}–${pageOffset + (data.items || []).length} / ${data.total || 0}`;
+      document.getElementById('prev-page').disabled = pageOffset <= 0;
+      document.getElementById('next-page').disabled = pageOffset + pageLimit >= lastTotal;
     }
 
     async function review(feedbackId, action, rejectionReason) {
@@ -219,7 +235,8 @@
         localStorage.setItem('hs_admin_token', tokenEl.value.trim());
         const q = new URLSearchParams();
         if (statusEl.value) q.set('status', statusEl.value);
-        q.set('limit', '50');
+        q.set('limit', String(pageLimit));
+        q.set('offset', String(pageOffset));
         const data = await api('/api/feedback?' + q.toString());
         renderRows(data);
         const pat = await api('/api/feedback?patterns=1');
@@ -238,7 +255,26 @@
       }
     }
 
-    document.getElementById('reload').onclick = load;
+    document.getElementById('reload').onclick = () => { pageOffset = 0; load(); };
+    document.getElementById('prev-page').onclick = () => { pageOffset = Math.max(0, pageOffset - pageLimit); load(); };
+    document.getElementById('next-page').onclick = () => { pageOffset += pageLimit; load(); };
+    document.getElementById('select-all').onchange = (e) => {
+      rowsEl.querySelectorAll('input.row-check').forEach((cb) => { cb.checked = e.target.checked; });
+    };
+    document.getElementById('bulk-approve').onclick = async () => {
+      const ids = selectedIds();
+      if (!ids.length) { alert('Chọn ít nhất một dòng pending'); return; }
+      try {
+        await api('/api/feedback', {
+          method: 'PATCH',
+          body: JSON.stringify({ feedbackIds: ids, action: 'approve', reviewedBy: 'admin-ui' }),
+        });
+        await load();
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.hidden = false;
+      }
+    };
     document.getElementById('export-csv').onclick = async () => {
       try {
         const csv = await api('/api/feedback?export=1');
@@ -252,7 +288,7 @@
         errEl.hidden = false;
       }
     };
-    statusEl.onchange = load;
+    statusEl.onchange = () => { pageOffset = 0; load(); };
   </script>
 </body>
 </html>

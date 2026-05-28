@@ -22,6 +22,7 @@
     "test:material-taxonomy": "node scripts/test-material-taxonomy.mjs",
     "test:access-log": "node scripts/test-access-log.mjs",
     "test:feedback": "node scripts/test-feedback-store.mjs",
+    "test:chapters": "node scripts/test-chapters-index.mjs",
     "data:build-specificity": "node scripts/build-specificity.mjs",
     "data:extract-legal-refs": "node scripts/extract-legal-refs.mjs"
   }

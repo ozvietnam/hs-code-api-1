@@ -40,6 +40,8 @@ module.exports = function handler(req, res) {
       hsCode: row.hs,
       nameVi: row.vn,
       unitVi: row.dvt || null,
+      taxMFN: row.mfn ?? null,
+      taxVAT: row.vat ?? null,
       hasPolicyWarning: Boolean(row.cs && String(row.cs).trim()),
     }))
     .sort((a, b) => a.hsCode.localeCompare(b.hsCode));

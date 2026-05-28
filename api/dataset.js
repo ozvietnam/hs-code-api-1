@@ -9,6 +9,7 @@ const { getNotesCoverage } = require('../lib/gir-notes');
 const { searchPrecedents } = require('../lib/precedent-search');
 const { listMinistries, getMinistriesByChapter } = require('../lib/ministries');
 const { detectMaterials, listTaxonomySummary } = require('../lib/material-taxonomy');
+const { buildChaptersIndex } = require('../lib/chapters-index');
 const fs = require('fs');
 const path = require('path');
 
@@ -67,6 +68,11 @@ module.exports = function handler(req, res) {
   try {
     if (resource === 'kg_stats') {
       return res.status(200).json(kgStatsPayload());
+    }
+
+    if (resource === 'chapters') {
+      const chapters = buildChaptersIndex();
+      return res.status(200).json({ total: chapters.length, chapters });
     }
 
     if (resource === 'conflicts') {

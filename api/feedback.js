@@ -6,6 +6,7 @@ const { setCors, handleOptions } = require('../lib/cors');
 const {
   listFeedback,
   reviewFeedback,
+  bulkReviewFeedback,
   detectRepeatedPatterns,
   exportCsv,
   FEEDBACK_PATH,
@@ -57,6 +58,14 @@ module.exports = function handler(req, res) {
 
   if (req.method === 'PATCH') {
     const body = parseBody(req);
+    if (Array.isArray(body?.feedbackIds) && body.feedbackIds.length) {
+      const bulk = bulkReviewFeedback(body.feedbackIds, {
+        action: body.action,
+        reviewedBy: body.reviewedBy,
+        rejectionReason: body.rejectionReason,
+      });
+      return res.status(200).json({ ok: true, ...bulk });
+    }
     if (!body?.feedbackId) {
       return res.status(400).json({ error: 'feedbackId is required' });
     }
