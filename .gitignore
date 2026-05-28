@@ -13,3 +13,11 @@ data/access-log.jsonl
 # Env
 .env
 .env.*
+
+# Oz internal declarations — PRIVATE, do not commit
+data/oz-export/*.xlsx
+data/oz-export/*.csv
+data/oz-export/*.jsonl
+data/oz-declarations.jsonl
+.env
+.vercel
