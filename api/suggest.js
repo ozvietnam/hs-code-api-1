@@ -6,7 +6,7 @@ const { buildEvidenceTrace } = require('../lib/suggest-evidence');
 const { applyGirRules } = require('../lib/gir-engine');
 const { applyPrecedentBoost, detectSet } = require('../lib/precedent-search');
 const { translateToVi, getBrandHint } = require('../lib/glossary');
-const { searchOzPrecedents } = require('../lib/oz-precedent-search');
+const { searchOzByKeyword } = require('../lib/oz-precedent-search');
 const { applyHistoricalSignals } = require('../lib/suggest-confidence');
 const { appendSuggestLog } = require('../lib/ml-log');
 
@@ -109,7 +109,8 @@ module.exports = async function handler(req, res) {
     const rawSuggestions = (json.suggestions || []).slice(0, topReranked);
     const girRanked = applyGirRules(rawSuggestions, description);
     const precedentRanked = applyPrecedentBoost(girRanked.suggestions, description);
-    const ozPrecedents = await searchOzPrecedents(description, { topK: 5 });
+    const ozSearch = await searchOzByKeyword(description, { limit: 5 });
+    const ozPrecedents = ozSearch.items; // [{hsCode, tenHang, ozCount, matchCoverage, ...}]
     const evidenceByHs = new Map(evidence.map((item) => [item.hsCode, item]));
     const historyAdjusted = applyHistoricalSignals({
       suggestions: precedentRanked.suggestions.slice(0, topReranked),

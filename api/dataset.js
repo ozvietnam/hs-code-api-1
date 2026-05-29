@@ -7,7 +7,7 @@ const { buildAdminOverview } = require('../lib/admin-overview');
 const { getDocByCode, listDocs } = require('../lib/legal-docs');
 const { getNotesCoverage } = require('../lib/gir-notes');
 const { searchPrecedents } = require('../lib/precedent-search');
-const { searchOzPrecedents, searchOzByHs } = require('../lib/oz-precedent-search');
+const { searchOzByHs, searchOzByKeyword } = require('../lib/oz-precedent-search');
 const { listMinistries, getMinistriesByChapter } = require('../lib/ministries');
 const { detectMaterials, listTaxonomySummary } = require('../lib/material-taxonomy');
 const { buildChaptersIndex } = require('../lib/chapters-index');
@@ -151,12 +151,13 @@ module.exports = async function handler(req, res) {
     if (resource === 'oz_precedents') {
       const { hs, q, description } = req.query;
       if (hs) {
-        const items = searchOzByHs(hs, { limit: req.query.limit });
+        const result = await searchOzByHs(hs, { limit: req.query.limit });
         return res.status(200).json({
-          found: items.length > 0,
-          hsCode: hs,
-          total: items.length,
-          items,
+          found: result.items.length > 0,
+          hsCode: result.hsCode,
+          distinctProducts: result.distinctProducts,
+          totalDeclarations: result.totalDeclarations,
+          items: result.items,
         });
       }
       const searchText = String(q || description || '').trim();
@@ -166,12 +167,13 @@ module.exports = async function handler(req, res) {
           examples: ['/api/oz-precedents?hs=85171300', '/api/oz-precedents?q=điện thoại iPhone'],
         });
       }
-      const matches = await searchOzPrecedents(searchText, { topK: 10 });
+      // FREE keyword search (no Gemini) trên gold sạch
+      const result = await searchOzByKeyword(searchText, { limit: 10 });
       return res.status(200).json({
-        found: matches.length > 0,
-        query: searchText,
-        total: matches.length,
-        matches,
+        found: result.total > 0,
+        query: result.query,
+        total: result.total,
+        matches: result.items,
       });
     }
 

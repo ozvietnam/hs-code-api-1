@@ -22,3 +22,8 @@ data/oz-export/*.jsonl
 data/oz-declarations.jsonl
 .env
 .vercel
+
+# Oz private derived data (mô tả sản phẩm — KHÔNG commit)
+data/oz-*.jsonl
+data/oz-*.json
+data/oz-declaration-embeddings.json
